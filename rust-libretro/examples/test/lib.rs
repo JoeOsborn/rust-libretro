@@ -19,7 +19,7 @@
 //! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 use libc::c_char;
-use rust_libretro::{
+use gisst_rust_libretro::{
     contexts::*, core::Core, env_version, error::EnvironmentCallError, input_descriptor,
     input_descriptors, proc::CoreOptions, retro_core, sys::*, types::*,
 };
@@ -644,9 +644,9 @@ impl Core for TestCore {
         &mut self,
         _info: Option<retro_game_info>,
         ctx: &mut LoadGameContext,
-    ) -> rust_libretro::core::Result<()> {
+    ) -> gisst_rust_libretro::core::Result<()> {
         ctx.set_pixel_format(PixelFormat::XRGB8888).map_err(|_| {
-            rust_libretro::anyhow::anyhow!("Required pixel format “XRGB8888” is not supported")
+            gisst_rust_libretro::anyhow::anyhow!("Required pixel format “XRGB8888” is not supported")
         })?;
 
         let _ = ctx.set_performance_level(0);
@@ -681,15 +681,15 @@ impl Core for TestCore {
         _info: *const retro_game_info,
         num_info: usize,
         ctx: &mut LoadGameSpecialContext,
-    ) -> rust_libretro::core::Result<()> {
+    ) -> gisst_rust_libretro::core::Result<()> {
         log::info!("Loading special content!");
 
         if game_type != 0x200 {
-            rust_libretro::anyhow::bail!("Unknown game type: 0x{game_type:03X}");
+            gisst_rust_libretro::anyhow::bail!("Unknown game type: 0x{game_type:03X}");
         }
 
         if num_info != 2 {
-            rust_libretro::anyhow::bail!("Invalid number of info objects: {num_info}");
+            gisst_rust_libretro::anyhow::bail!("Invalid number of info objects: {num_info}");
         }
 
         self.on_load_game(None, &mut ctx.into())
@@ -918,7 +918,7 @@ impl Core for TestCore {
         &mut self,
         slice: &mut [u8],
         _ctx: &mut SerializeContext,
-    ) -> rust_libretro::core::Result<()> {
+    ) -> gisst_rust_libretro::core::Result<()> {
         slice[0..std::mem::size_of_val(&self.x_coord)].copy_from_slice(&self.x_coord.to_le_bytes());
         slice[std::mem::size_of_val(&self.x_coord)..].copy_from_slice(&self.y_coord.to_le_bytes());
 
@@ -929,7 +929,7 @@ impl Core for TestCore {
         &mut self,
         slice: &mut [u8],
         _ctx: &mut UnserializeContext,
-    ) -> rust_libretro::core::Result<()> {
+    ) -> gisst_rust_libretro::core::Result<()> {
         use byterepr::ByteRepr;
 
         self.x_coord = ByteRepr::from_le_bytes(&slice[0..std::mem::size_of_val(&self.x_coord)]);

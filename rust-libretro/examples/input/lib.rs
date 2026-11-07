@@ -1,5 +1,5 @@
 use image::{DynamicImage, ImageFormat, ImageResult};
-use rust_libretro::{
+use gisst_rust_libretro::{
     contexts::*,
     core::{Core, CoreOptions},
     env_version, retro_core,
@@ -76,12 +76,12 @@ impl Core for InputTestCore {
         &mut self,
         _info: Option<retro_game_info>,
         ctx: &mut LoadGameContext,
-    ) -> rust_libretro::core::Result<()> {
+    ) -> gisst_rust_libretro::core::Result<()> {
         use image::imageops::{flip_horizontal, flip_vertical, rotate90};
         use DynamicImage::ImageRgba8;
 
         ctx.set_pixel_format(PixelFormat::XRGB8888).map_err(|_| {
-            rust_libretro::anyhow::anyhow!("Required pixel format “XRGB8888” is not supported")
+            gisst_rust_libretro::anyhow::anyhow!("Required pixel format “XRGB8888” is not supported")
         })?;
 
         let _ = ctx.set_performance_level(0);

@@ -3,7 +3,6 @@ pub fn is_public(item: &syn::Item) -> bool {
         syn::Item::Const(item) => matches!(item.vis, syn::Visibility::Public(_)),
         syn::Item::Enum(item) => matches!(item.vis, syn::Visibility::Public(_)),
         syn::Item::Fn(item) => matches!(item.vis, syn::Visibility::Public(_)),
-        syn::Item::Macro2(item) => matches!(item.vis, syn::Visibility::Public(_)),
         syn::Item::Mod(item) => matches!(item.vis, syn::Visibility::Public(_)),
         syn::Item::Static(item) => matches!(item.vis, syn::Visibility::Public(_)),
         syn::Item::Struct(item) => matches!(item.vis, syn::Visibility::Public(_)),
@@ -20,7 +19,6 @@ pub fn get_visibility_mut(item: &mut syn::Item) -> Option<&mut syn::Visibility> 
         syn::Item::Const(item) => Some(&mut item.vis),
         syn::Item::Enum(item) => Some(&mut item.vis),
         syn::Item::Fn(item) => Some(&mut item.vis),
-        syn::Item::Macro2(item) => Some(&mut item.vis),
         syn::Item::Mod(item) => Some(&mut item.vis),
         syn::Item::Static(item) => Some(&mut item.vis),
         syn::Item::Struct(item) => Some(&mut item.vis),
@@ -38,7 +36,6 @@ pub fn get_attrs_mut(item: &mut syn::Item) -> Option<&mut Vec<syn::Attribute>> {
         syn::Item::Enum(item) => Some(&mut item.attrs),
         syn::Item::Fn(item) => Some(&mut item.attrs),
         syn::Item::Macro(item) => Some(&mut item.attrs),
-        syn::Item::Macro2(item) => Some(&mut item.attrs),
         syn::Item::Mod(item) => Some(&mut item.attrs),
         syn::Item::Static(item) => Some(&mut item.attrs),
         syn::Item::Struct(item) => Some(&mut item.attrs),
@@ -54,7 +51,7 @@ pub fn prepend_doc(attrs: &mut Vec<syn::Attribute>, doc: &str) {
     let mut had_doc = false;
 
     for (index, attribute) in attrs.iter_mut().enumerate() {
-        if attribute.path.is_ident("doc") {
+        if attribute.path().is_ident("doc") {
             let doc = syn::parse_quote! {
                 #[doc = #doc]
             };

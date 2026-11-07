@@ -1,6 +1,6 @@
 //! Rust versions of libretro data structures.
 use crate::proc;
-use rust_libretro_sys::*;
+use gisst_rust_libretro_sys::*;
 use std::{collections::HashMap, ffi::CString};
 
 /// Static information about the [`Core`] implementation.
@@ -326,7 +326,7 @@ pub struct Position {
 pub mod unstable {
     use super::PixelFormat;
     use core::marker::PhantomData;
-    use rust_libretro_sys::*;
+    use gisst_rust_libretro_sys::*;
 
     bitflags::bitflags! {
         /// Tells the core if the frontend wants audio or video.

@@ -252,7 +252,7 @@ jobs:
           base_dir=$(pwd)
           shopt -s nullglob
 
-          file=rust-libretro-${{ matrix.name }}.tar
+          file=gisst-rust-libretro-${{ matrix.name }}.tar
           cd ${{ format('target/{0}/debug', env.CARGO_BUILD_TARGET) }}
 
           tar cvf $file \
@@ -265,6 +265,6 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: rust-libretro-${{ matrix.name }}
+          name: gisst-rust-libretro-${{ matrix.name }}
           path: ${{ steps.compression.outputs.file }}
           if-no-files-found: error

@@ -23,7 +23,7 @@ use dasp_sample::Sample;
 use dasp_signal::{self as signal, ConstHz, IntoInterleavedSamples, ScaleAmp, Signal, Sine};
 use num::Integer;
 use num_traits::{cast::AsPrimitive, int::PrimInt};
-use rust_libretro::{
+use gisst_rust_libretro::{
     contexts::*, core::Core, env_version, proc::CoreOptions, retro_core, sys::*, types::*,
 };
 use serde::{Deserialize, Serialize, Serializer};
@@ -856,11 +856,11 @@ impl Core for AdvancedTestCore {
         &mut self,
         _info: Option<retro_game_info>,
         ctx: &mut LoadGameContext,
-    ) -> rust_libretro::core::Result<()> {
+    ) -> gisst_rust_libretro::core::Result<()> {
         self.active_pixel_format = self.pixel_format;
         ctx.set_pixel_format(self.active_pixel_format)
             .map_err(|_| {
-                rust_libretro::anyhow::anyhow!(
+                gisst_rust_libretro::anyhow::anyhow!(
                     "Required pixel format “{:?}” is not supported",
                     self.active_pixel_format
                 )
@@ -1044,7 +1044,7 @@ impl Core for AdvancedTestCore {
         &mut self,
         slice: &mut [u8],
         _ctx: &mut SerializeContext,
-    ) -> rust_libretro::core::Result<()> {
+    ) -> gisst_rust_libretro::core::Result<()> {
         use bincode::Options;
 
         bincode::DefaultOptions::new()
@@ -1057,7 +1057,7 @@ impl Core for AdvancedTestCore {
         &mut self,
         slice: &mut [u8],
         _ctx: &mut UnserializeContext,
-    ) -> rust_libretro::core::Result<()> {
+    ) -> gisst_rust_libretro::core::Result<()> {
         use bincode::Options;
 
         let state = bincode::DefaultOptions::new()

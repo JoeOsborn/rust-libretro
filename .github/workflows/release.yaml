@@ -37,7 +37,7 @@ jobs:
         if: github.event_name != 'workflow_dispatch'
         with:
           file: rust-libretro-docs.tar.gz
-          release_name: rust-libretro ${{ github.ref_name }}
+          release_name: gisst-rust-libretro ${{ github.ref_name }}
           tag: ${{ github.ref }}
           prerelease: ${{ contains(github.ref, 'rc') }}
 
@@ -120,13 +120,13 @@ jobs:
       - name: Set up Unix environment
         run: |
           echo "RUSTFLAGS=-Cstrip=symbols" >> $GITHUB_ENV
-          echo "RELEASE_FILE=rust-libretro-${{ matrix.name }}-${{ github.ref_name }}.tar" >> $GITHUB_ENV
+          echo "RELEASE_FILE=gisst-rust-libretro-${{ matrix.name }}-${{ github.ref_name }}.tar" >> $GITHUB_ENV
         if: matrix.os != 'windows-latest'
 
       - name: Set up Windows environment
         run: |
           echo "RUSTFLAGS=-Cstrip=symbols" >> $env:GITHUB_ENV
-          echo "RELEASE_FILE=rust-libretro-${{ matrix.name }}-${{ github.ref_name }}.tar" >> $env:GITHUB_ENV
+          echo "RELEASE_FILE=gisst-rust-libretro-${{ matrix.name }}-${{ github.ref_name }}.tar" >> $env:GITHUB_ENV
           echo "LIBCLANG_PATH=$((Get-Command clang).source -replace "clang.exe")" >> $env:GITHUB_ENV
         if: matrix.os == 'windows-latest'
 
@@ -187,7 +187,7 @@ jobs:
           base_dir=$(pwd)
           shopt -s nullglob
 
-          file=rust-libretro-${{ matrix.name }}.tar
+          file=gisst-rust-libretro-${{ matrix.name }}.tar
           cd ${{ format('target/{0}/release', env.CARGO_BUILD_TARGET) }}
 
           tar cvf $file \
@@ -202,7 +202,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v3
         with:
-          name: rust-libretro-${{ matrix.name }}
+          name: gisst-rust-libretro-${{ matrix.name }}
           path: ${{ steps.compression.outputs.file }}
           if-no-files-found: error
 
@@ -211,6 +211,6 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           file: ${{ steps.compression.outputs.file }}
-          release_name: rust-libretro ${{ github.ref_name }}
+          release_name: gisst-rust-libretro ${{ github.ref_name }}
           tag: ${{ github.ref }}
           prerelease: ${{ contains(github.ref, 'rc') }}

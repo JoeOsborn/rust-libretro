@@ -6,7 +6,11 @@
 //! (e.g. "VkDevice" becomes "vk::Device").
 
 pub use ash;
-use ash::vk::*;
+use ash::vk::{
+    ApplicationInfo, CommandBuffer, Device, DeviceCreateInfo, ImageLayout, ImageView,
+    ImageViewCreateInfo, Instance, InstanceCreateInfo, PhysicalDevice, PhysicalDeviceFeatures,
+    Queue, Semaphore, SurfaceKHR,
+};
 
 pub type PFN_vkGetInstanceProcAddr = Option<ash::vk::PFN_vkGetInstanceProcAddr>;
 pub type PFN_vkGetDeviceProcAddr = Option<ash::vk::PFN_vkGetDeviceProcAddr>;

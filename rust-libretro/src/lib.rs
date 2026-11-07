@@ -1,7 +1,7 @@
 #![allow(clippy::missing_safety_doc)]
 #![doc(
-    html_logo_url = "https://raw.githubusercontent.com/max-m/rust-libretro/master/media/logo.png",
-    html_favicon_url = "https://raw.githubusercontent.com/max-m/rust-libretro/master/media/favicon.png"
+    html_logo_url = "https://raw.githubusercontent.com/joeosborn/rust-libretro/master/media/logo.png",
+    html_favicon_url = "https://raw.githubusercontent.com/joeosborn/rust-libretro/master/media/favicon.png"
 )]
 
 #[cfg(feature = "log")]
@@ -20,21 +20,40 @@ pub mod util;
 pub use anyhow;
 pub use const_str;
 
-pub use macros::*;
-pub use rust_libretro_proc as proc;
-pub use rust_libretro_sys as sys;
+pub use gisst_rust_libretro_proc as proc;
+pub use gisst_rust_libretro_sys as sys;
 
 use crate::{contexts::*, core::Core, core_wrapper::CoreWrapper, sys::*, types::*, util::*};
 use std::{ffi::*, sync::Arc};
 
+#[repr(transparent)]
+pub struct SyncUnsafeCell(std::cell::UnsafeCell<Option<CoreWrapper>>);
+
+unsafe impl Sync for SyncUnsafeCell {}
+
+impl SyncUnsafeCell {
+    unsafe fn as_ref(&self) -> Option<&CoreWrapper> {
+        (*self.0.get()).as_ref()
+    }
+    unsafe fn as_mut(&self) -> Option<&mut CoreWrapper> {
+        (*self.0.get()).as_mut()
+    }
+    unsafe fn replace(&self, cw:CoreWrapper) {
+        (*self.0.get()).replace(cw);
+    }
+    unsafe fn is_some(&self)->bool {
+        (*self.0.get()).is_some()
+    }
+}
+
 #[doc(hidden)]
-static mut RETRO_INSTANCE: Option<CoreWrapper> = None;
+static RETRO_INSTANCE: SyncUnsafeCell = SyncUnsafeCell(std::cell::UnsafeCell::new(None));
 
 /// This macro must be used to initialize your [`Core`].
 ///
 /// # Examples
 /// ```rust
-/// # use rust_libretro::{contexts::*, core::{Core, CoreOptions}, sys::*, types::*, retro_core};
+/// # use gisst_rust_libretro::{contexts::*, core::{Core, CoreOptions}, sys::*, types::*, retro_core};
 /// # use std::ffi::CString;
 /// struct ExampleCore {
 ///     option_1: bool,
@@ -287,7 +306,7 @@ forward!(
 forward!(
     #[doc = "Called when the frontend needs to know how large a buffer to allocate for save states."],
     #[doc = ""],
-    #[doc = "See also [`rust_libretro_sys::retro_serialize_size`]."],
+    #[doc = "See also [`gisst_rust_libretro_sys::retro_serialize_size`]."],
     wrapper,
     retro_serialize_size,
     get_serialize_size -> usize,
@@ -385,7 +404,7 @@ pub unsafe extern "C" fn retro_init() {
 
 /// Provides _statically known_ system info to the frontend.
 ///
-/// See also [`rust_libretro_sys::retro_get_system_info`].
+/// See also [`gisst_rust_libretro_sys::retro_get_system_info`].
 #[no_mangle]
 pub unsafe extern "C" fn retro_get_system_info(info: *mut retro_system_info) {
     #[cfg(feature = "log")]
@@ -433,7 +452,7 @@ pub unsafe extern "C" fn retro_get_system_info(info: *mut retro_system_info) {
 ///
 /// Guaranteed to be called only after successful invocation of [`retro_load_game`].
 ///
-/// See also [`rust_libretro_sys::retro_get_system_av_info`].
+/// See also [`gisst_rust_libretro_sys::retro_get_system_av_info`].
 #[no_mangle]
 pub unsafe extern "C" fn retro_get_system_av_info(info: *mut retro_system_av_info) {
     #[cfg(feature = "log")]
@@ -524,7 +543,7 @@ pub unsafe extern "C" fn retro_set_environment(environment: retro_environment_t)
 
 /// Sets the device type to be used for player `port`.
 ///
-/// See also [`rust_libretro_sys::retro_set_controller_port_device`].
+/// See also [`gisst_rust_libretro_sys::retro_set_controller_port_device`].
 #[no_mangle]
 pub unsafe extern "C" fn retro_set_controller_port_device(
     port: std::os::raw::c_uint,
@@ -549,7 +568,7 @@ pub unsafe extern "C" fn retro_set_controller_port_device(
 
 /// Runs the game for one frame.
 ///
-/// See also [`rust_libretro_sys::retro_run`].
+/// See also [`gisst_rust_libretro_sys::retro_run`].
 #[no_mangle]
 pub unsafe extern "C" fn retro_run() {
     #[cfg(feature = "log")]
@@ -767,7 +786,7 @@ pub unsafe extern "C" fn retro_load_game(game: *const retro_game_info) -> bool {
     panic!("retro_load_game: Core has not been initialized yet!");
 }
 
-/// See [`rust_libretro_sys::retro_load_game_special`].
+/// See [`gisst_rust_libretro_sys::retro_load_game_special`].
 #[no_mangle]
 pub unsafe extern "C" fn retro_load_game_special(
     game_type: std::os::raw::c_uint,

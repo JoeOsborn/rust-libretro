@@ -19,7 +19,7 @@
 //! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 use crate::ash::prelude::VkResult;
-use rust_libretro::{
+use gisst_rust_libretro::{
     c_char_ptr, c_str,
     contexts::*,
     core::Core,
@@ -934,7 +934,7 @@ impl Core for TestCore {
         &mut self,
         _game: Option<retro_game_info>,
         ctx: &mut LoadGameContext,
-    ) -> rust_libretro::core::Result<()> {
+    ) -> gisst_rust_libretro::core::Result<()> {
         unsafe {
             ctx.enable_hw_render(
                 retro_hw_context_type::RETRO_HW_CONTEXT_VULKAN,

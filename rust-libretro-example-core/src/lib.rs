@@ -1,4 +1,4 @@
-use rust_libretro::{
+use gisst_rust_libretro::{
     contexts::*, core::Core, env_version, input_descriptors, proc::*, retro_core, sys::*, types::*,
 };
 use std::ffi::CString;
@@ -108,9 +108,9 @@ impl Core for ExampleCore {
         &mut self,
         _info: Option<retro_game_info>,
         ctx: &mut LoadGameContext,
-    ) -> rust_libretro::core::Result<()> {
+    ) -> gisst_rust_libretro::core::Result<()> {
         ctx.set_pixel_format(PixelFormat::XRGB8888).map_err(|_| {
-            rust_libretro::anyhow::anyhow!("Required pixel format “XRGB8888” is not supported")
+            gisst_rust_libretro::anyhow::anyhow!("Required pixel format “XRGB8888” is not supported")
         })?;
 
         let _ = ctx.set_performance_level(0);

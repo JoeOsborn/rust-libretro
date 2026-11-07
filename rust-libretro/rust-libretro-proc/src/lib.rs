@@ -1,17 +1,13 @@
 #![doc(
-    html_logo_url = "https://raw.githubusercontent.com/max-m/rust-libretro/master/media/logo.png",
-    html_favicon_url = "https://raw.githubusercontent.com/max-m/rust-libretro/master/media/favicon.png"
+    html_logo_url = "https://raw.githubusercontent.com/joeosborn/rust-libretro/master/media/logo.png",
+    html_favicon_url = "https://raw.githubusercontent.com/joeosborn/rust-libretro/master/media/favicon.png"
 )]
 
 use proc_macro::{self, TokenStream};
 use quote::{quote, ToTokens};
-use rust_libretro_sys::RETRO_NUM_CORE_OPTION_VALUES_MAX;
+use gisst_rust_libretro_sys::RETRO_NUM_CORE_OPTION_VALUES_MAX;
 use syn::{
-    braced, parenthesized,
-    parse::{discouraged::Speculative, Parse, ParseStream, Result},
-    parse2, parse_macro_input, parse_quote,
-    punctuated::Punctuated,
-    Attribute, DeriveInput, LitByteStr, LitStr, NestedMeta, Token,
+    Attribute, DeriveInput, LitByteStr, LitStr, Meta, Token, braced, parenthesized, parse::{Parse, ParseStream, Result, discouraged::Speculative}, parse_macro_input, parse_quote, parse2, punctuated::Punctuated
 };
 
 mod util;
@@ -355,8 +351,8 @@ fn impl_derive_core_options(input: DeriveInput) -> TokenStream {
 
     let options = attrs
         .iter()
-        .filter(|attr| attr.path.is_ident("options"))
-        .map(|attr| -> Result<CoreOptions> { parse2(attr.tokens.clone()) })
+        .filter(|attr| attr.path().is_ident("options"))
+        .map(|attr| -> Result<CoreOptions> { parse2(attr.parse_args()?) })
         .collect::<Result<Vec<_>>>();
 
     let options = match options {
@@ -366,8 +362,8 @@ fn impl_derive_core_options(input: DeriveInput) -> TokenStream {
 
     let categories = attrs
         .iter()
-        .filter(|attr| attr.path.is_ident("categories"))
-        .map(|attr| -> Result<CoreOptionCategories> { parse2(attr.tokens.clone()) })
+        .filter(|attr| attr.path().is_ident("categories"))
+        .map(|attr| -> Result<CoreOptionCategories> { parse2(attr.parse_args()?) })
         .collect::<Result<Vec<_>>>();
 
     let categories = match categories {
@@ -561,8 +557,8 @@ fn impl_derive_core_options(input: DeriveInput) -> TokenStream {
         .collect::<Vec<_>>();
 
     let expanded = quote! {
-        impl #impl_generics ::rust_libretro::core::CoreOptions for #name #ty_generics #where_clause {
-            fn set_core_options(&self, ctx: &SetEnvironmentContext) -> Result<bool, ::rust_libretro::error::EnvironmentCallError> {
+        impl #impl_generics ::gisst_rust_libretro::core::CoreOptions for #name #ty_generics #where_clause {
+            fn set_core_options(&self, ctx: &SetEnvironmentContext) -> Result<bool, ::gisst_rust_libretro::error::EnvironmentCallError> {
                 let gctx: GenericContext = ctx.into();
 
                 match gctx.get_core_options_version() {
@@ -674,14 +670,14 @@ fn add_unstable_text(attrs: &mut Vec<Attribute>, feature_name: &str) {
 /// # Examples
 ///
 /// ```rust
-/// #[rust_libretro_proc::unstable(feature = "name")]
+/// #[gisst_rust_libretro_proc::unstable(feature = "name")]
 /// fn my_example_function() { }
 /// ```
 ///
 /// ```rust
-/// // We must add an empty `rust_libretro_proc::unstable` attribute to the struct,
+/// // We must add an empty `gisst_rust_libretro_proc::unstable` attribute to the struct,
 /// // in order to process the struct items.
-/// #[rust_libretro_proc::unstable]
+/// #[gisst_rust_libretro_proc::unstable]
 /// struct Example {
 ///     pub stable_struct_item: bool,
 ///
@@ -691,9 +687,9 @@ fn add_unstable_text(attrs: &mut Vec<Attribute>, feature_name: &str) {
 /// ```
 #[proc_macro_attribute]
 pub fn unstable(args: TokenStream, input: TokenStream) -> TokenStream {
-    use syn::{AttributeArgs, Item, Lit, Meta, MetaList, Visibility};
+    use syn::{punctuated::Punctuated, Item, Lit, Meta, Visibility};
 
-    let args = parse_macro_input!(args as AttributeArgs);
+    let args = parse_macro_input!(args with Punctuated::<Meta, syn::Token![,]>::parse_terminated);
     let mut item = parse_macro_input!(input as Item);
 
     // Handle unstable struct items
@@ -704,30 +700,28 @@ pub fn unstable(args: TokenStream, input: TokenStream) -> TokenStream {
 
                 for index in 0..len {
                     let field = &mut fields.named[index];
-                    let metas = field
+                    let attrs:Vec<_> = field
                         .attrs
                         .iter()
-                        .filter(|attr| attr.path.is_ident("unstable"))
-                        .filter_map(|attr| attr.parse_meta().ok())
-                        .collect::<Vec<_>>();
+                        .filter_map(|attr| if attr.path().is_ident("unstable"){ attr.parse_args::<Meta>().ok().as_ref().cloned()} else { None })
+                        .collect();
 
-                    field.attrs.retain(|attr| !attr.path.is_ident("unstable"));
+                    field.attrs.retain(|attr| !attr.path().is_ident("unstable"));
 
-                    if matches!(field.vis, Visibility::Public(_)) && !metas.is_empty() {
+                    if matches!(field.vis, Visibility::Public(_)) && !attrs.is_empty() {
                         let mut private_item = field.clone();
                         private_item.vis = parse_quote!(pub(crate));
 
-                        for meta in &metas {
-                            let mut feature_name = "unstable".to_owned();
-
-                            if let Meta::List(MetaList { nested, .. }) = meta {
-                                if let NestedMeta::Meta(Meta::NameValue(ref named_value)) =
-                                    nested[0]
-                                {
-                                    if let Lit::Str(custom_name) = &named_value.lit {
-                                        feature_name = format!("unstable-{}", custom_name.value());
-                                    }
-                                }
+                        for attr in &attrs {
+                            let feature_name;
+                            if let syn::Meta::NameValue(syn::MetaNameValue{
+                                value:syn::Expr::Lit(syn::ExprLit{lit:syn::Lit::Str(name),..
+                                }),
+                                ..
+                            }) = attr {
+                                feature_name = format!("unstable-{}",name.value());
+                            } else {
+                                panic!("unstable attributes need to specify a feature name");
                             }
 
                             add_unstable_text(&mut field.attrs, &feature_name);
@@ -754,15 +748,18 @@ pub fn unstable(args: TokenStream, input: TokenStream) -> TokenStream {
         let mut name = "unstable".to_owned();
 
         for arg in args.iter() {
-            if let NestedMeta::Lit(Lit::Str(custom_name)) = arg {
-                name = format!("unstable-{}", custom_name.value());
+            if let Meta::Path(p) = arg {
+                name = format!("unstable-{}", p.require_ident().unwrap());
                 break;
-            } else if let NestedMeta::Meta(Meta::NameValue(named_value)) = arg {
-                if let Lit::Str(custom_name) = &named_value.lit {
+            } else if let Meta::NameValue(named_value) = arg {
+                if let syn::Expr::Lit(syn::ExprLit{lit:Lit::Str(custom_name),..}) = &named_value.value {
                     name = format!("unstable-{}", custom_name.value());
                     break;
                 }
             }
+        }
+        if name == "unstable" {
+            panic!("args {:?}",args);
         }
 
         name
@@ -770,7 +767,7 @@ pub fn unstable(args: TokenStream, input: TokenStream) -> TokenStream {
 
     if let Item::Fn(ref mut item) = item {
         // Mark the function as unsafe
-        item.sig.unsafety = Some(parse_quote!(unsafe));
+        item.sig.safety = syn::Safety::Unsafe(parse_quote!(unsafe));
     }
 
     if is_public(&item) {
@@ -801,14 +798,14 @@ pub fn unstable(args: TokenStream, input: TokenStream) -> TokenStream {
 #[doc(hidden)]
 #[proc_macro_attribute]
 pub fn context(args: TokenStream, input: TokenStream) -> TokenStream {
-    let args = parse_macro_input!(args as syn::AttributeArgs);
-    let ctx_name = if let NestedMeta::Meta(syn::Meta::Path(path)) = args.get(0).unwrap() {
+    let args = parse_macro_input!(args with Punctuated::<Meta, syn::Token![,]>::parse_terminated);
+    let ctx_name = if let Meta::Path(path) = args.get(0).unwrap() {
         path.get_ident().unwrap()
     } else {
         panic!("expected Ident");
     };
 
-    let keep_unsafe = if let Some(NestedMeta::Meta(syn::Meta::Path(path))) = args.get(1) {
+    let keep_unsafe = if let Some(Meta::Path(path)) = args.get(1) {
         path.get_ident().unwrap() == "unsafe"
     } else {
         false
@@ -819,7 +816,7 @@ pub fn context(args: TokenStream, input: TokenStream) -> TokenStream {
 
     if !keep_unsafe {
         // Mark functions as safe in this context
-        fun.sig.unsafety = None;
+        fun.sig.safety = syn::Safety::Default;
     }
 
     let mut inputs: Punctuated<syn::FnArg, Token![,]> = Punctuated::new();
@@ -844,7 +841,7 @@ pub fn context(args: TokenStream, input: TokenStream) -> TokenStream {
 
     // Remove the `context` attribute
     fun.attrs
-        .retain(|attr| attr.path.segments.last().unwrap().ident != "context");
+        .retain(|attr| attr.path().segments.last().unwrap().ident != "context");
 
     // Replace the function arguments
     fun.sig.inputs = inputs;

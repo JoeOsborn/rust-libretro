@@ -7,14 +7,13 @@ use crate::{
     util::*,
     *,
 };
-use once_cell::unsync::Lazy;
-use std::{path::PathBuf, sync::Arc};
+use std::{path::PathBuf, sync::{Arc,LazyLock}};
 
 #[macro_use]
 mod macros;
 
 /// This would only be used in [`Core::on_run`] from a single thread.
-static mut FALLBACK_FRAMEBUFFER: Lazy<Vec<u8>> = Lazy::new(Vec::new);
+static FALLBACK_FRAMEBUFFER: LazyLock<Vec<u8>> = LazyLock::new(Vec::new);
 
 /// Exposes environment callbacks that are safe to call in every context.
 pub struct GenericContext<'a> {
@@ -421,7 +420,7 @@ impl<'a> GenericContext<'a> {
         let handle = unsafe { open(c_path.as_ptr(), mode.bits(), hints.bits()) };
 
         if !handle.is_null() {
-            let handle = unsafe { *handle };
+            let handle = unsafe { handle.read() };
             return Ok(handle);
         }
 
@@ -671,7 +670,7 @@ impl<'a> GenericContext<'a> {
         let handle = unsafe { opendir(c_dir.as_ptr(), include_hidden) };
 
         if !handle.is_null() {
-            let handle = unsafe { *handle };
+            let handle = unsafe { handle.read() };
             return Ok(handle);
         }
 
@@ -1446,7 +1445,7 @@ impl RunContext<'_> {
         match self.get_current_framebuffer(width, height, access_flags, format) {
             Ok(fb) if fb.access_flags.intersects(access_flags) => fb,
             _ => {
-                let data = unsafe { &mut FALLBACK_FRAMEBUFFER };
+                let data = FALLBACK_FRAMEBUFFER.force();
 
                 let pitch = width as usize * format.bit_per_pixel();
                 let data_len = width as usize * height as usize * pitch;

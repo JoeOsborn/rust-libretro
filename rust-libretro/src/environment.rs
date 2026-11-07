@@ -479,7 +479,7 @@ pub unsafe fn get_all_variables<'a>(
 /// The passed array of [`retro_variable`] structs must be
 /// terminated by a
 /// ```
-/// # use rust_libretro_sys::retro_variable;
+/// # use gisst_rust_libretro_sys::retro_variable;
 /// retro_variable {
 ///     key:   0 as *const libc::c_char,
 ///     value: 0 as *const libc::c_char,
@@ -502,7 +502,7 @@ pub unsafe fn get_all_variables<'a>(
 ///
 /// # Examples
 /// ```
-/// # use rust_libretro_sys::retro_variable;
+/// # use gisst_rust_libretro_sys::retro_variable;
 /// retro_variable {
 ///     key:   b"foo_option" as *const u8 as *const libc::c_char,
 ///     value: b"Speed hack coprocessor X; false|true" as *const u8 as *const libc::c_char,
@@ -672,8 +672,8 @@ pub unsafe fn get_input_device_capabilities(
 /// enabling/disable it entirely, etc.
 /// Reading sensor state is done via the normal
 /// input_state_callback API.
-#[proc::context(GenericContext)]
 #[proc::unstable(feature = "env-commands")]
+#[proc::context(GenericContext)]
 pub unsafe fn get_sensor_interface(
     callback: retro_environment_t,
 ) -> Result<retro_sensor_interface, EnvironmentCallError> {
@@ -702,8 +702,8 @@ pub unsafe fn get_sensor_interface(
 ///
 /// The camera is not started automatically. The retrieved start/stop
 /// functions must be used to explicitly
-#[proc::context(LoadGameContext)]
 #[proc::unstable(feature = "env-commands")]
+#[proc::context(LoadGameContext)]
 pub unsafe fn get_camera_interface(
     callback: retro_environment_t,
     data: retro_camera_callback,
@@ -930,9 +930,9 @@ pub unsafe fn set_controller_info(
 /// retro_get_memory_* as well.
 ///
 /// Can be called from [`Core::on_init`] and [`Core::on_load_game`].
+#[proc::unstable(feature = "env-commands")]
 #[proc::context(InitContext)]
 #[proc::context(LoadGameContext)]
-#[proc::unstable(feature = "env-commands")]
 pub unsafe fn set_memory_maps(
     callback: retro_environment_t,
     data: retro_memory_map,
@@ -1035,8 +1035,8 @@ pub unsafe fn get_language(
 ///
 /// A frontend must make sure that the pointer obtained from this function is
 /// writeable (and readable).
-#[proc::context(GenericContext)]
 #[proc::unstable(feature = "env-commands")]
+#[proc::context(GenericContext)]
 pub unsafe fn get_current_software_framebuffer(
     callback: retro_environment_t,
     data: retro_framebuffer,
@@ -1059,8 +1059,8 @@ pub unsafe fn get_current_software_framebuffer(
 /// Similarly, after [`retro_hw_context_destroyed_callback`] returns, the contents of the HW_RENDER_INTERFACE are invalidated.
 ///
 /// **TODO:** Set a status flag in [`retro_hw_context_reset_callback`] and [`retro_hw_context_destroyed_callback`] to force the mentioned call restrictions.
-#[proc::context(GenericContext)]
 #[proc::unstable(feature = "env-commands")]
+#[proc::context(GenericContext)]
 pub unsafe fn get_hw_render_interface(
     callback: retro_environment_t,
 ) -> Result<retro_hw_render_interface, EnvironmentCallError> {
@@ -1082,8 +1082,8 @@ pub unsafe fn get_hw_render_interface(
 
 /// See [`get_hw_render_interface`].
 #[cfg(feature = "vulkan")]
-#[proc::context(GenericContext)]
 #[proc::unstable(feature = "env-commands")]
+#[proc::context(GenericContext)]
 pub unsafe fn get_hw_render_interface_vulkan(
     callback: retro_environment_t,
 ) -> Result<retro_hw_render_interface_vulkan, EnvironmentCallError> {
@@ -1107,8 +1107,8 @@ pub unsafe fn get_hw_render_interface_vulkan(
 ///
 /// Either via memory descriptors set with [`RETRO_ENVIRONMENT_SET_MEMORY_MAPS`]
 /// or via [`Core::get_memory_data`] / [`Core::get_memory_size`].
-#[proc::context(InitContext)]
 #[proc::unstable(feature = "env-commands")]
+#[proc::context(InitContext)]
 pub unsafe fn set_support_achievements(
     callback: retro_environment_t,
     value: bool,
@@ -1121,8 +1121,8 @@ pub unsafe fn set_support_achievements(
 /// The semantics of this interface depends on which API is used in [`set_hw_render`] earlier.
 /// This interface will be used when the frontend is trying to create a HW rendering context,
 /// so it will be used after [`set_hw_render`], but before the context_reset callback.
-#[proc::context(LoadGameContext)]
 #[proc::unstable(feature = "env-commands")]
+#[proc::context(LoadGameContext)]
 pub unsafe fn set_hw_render_context_negotiation_interface(
     callback: retro_environment_t,
     interface: &retro_hw_render_context_negotiation_interface,
@@ -1157,9 +1157,9 @@ pub unsafe fn set_hw_render_context_negotiation_interface(
 /// If a core uses Vulkan negotiation interface with version > 1, negotiation may fail unexpectedly.
 /// All future updates to the context negotiation interface implies that frontend must support
 /// this environment call to query support.
+#[proc::unstable(feature = "env-commands")]
 #[proc::context(InitContext)]
 #[proc::context(LoadGameContext)]
-#[proc::unstable(feature = "env-commands")]
 pub unsafe fn get_hw_render_context_negotiation_interface_support(
     callback: retro_environment_t,
     interface_type: retro_hw_render_context_negotiation_interface_type,
@@ -1206,8 +1206,8 @@ pub unsafe fn set_serialization_quirks(
 ///
 /// This will do nothing on its own until `SET_HW_RENDER` environment callbacks are
 /// being used.
-#[proc::context(GenericContext)]
 #[proc::unstable(feature = "env-commands")]
+#[proc::context(GenericContext)]
 pub unsafe fn set_hw_shared_context(
     callback: retro_environment_t,
 ) -> Result<(), EnvironmentCallError> {
@@ -1224,8 +1224,8 @@ pub unsafe fn set_hw_shared_context(
 /// get_system/save/other_directory being called to let front end know
 /// core supports VFS before it starts handing out paths.
 /// It is recomended to do so in [`Core::on_set_environment`].
-#[proc::context(SetEnvironmentContext)]
 #[proc::unstable(feature = "env-commands")]
+#[proc::context(SetEnvironmentContext)]
 pub fn get_vfs_interface(
     callback: retro_environment_t,
     data: retro_vfs_interface_info,
@@ -1235,8 +1235,8 @@ pub fn get_vfs_interface(
 }
 
 /// Gets an interface which is used by a libretro core to set state of LEDs.
-#[proc::context(GenericContext)]
 #[proc::unstable(feature = "env-commands")]
+#[proc::context(GenericContext)]
 pub fn get_led_interface(
     callback: retro_environment_t,
 ) -> Result<retro_led_interface, EnvironmentCallError> {
@@ -1250,8 +1250,8 @@ pub fn get_led_interface(
 /// This is mainly used for increasing performance.
 ///
 /// See [`AudioVideoEnable`] for descriptions of the flags.
-#[proc::context(GenericContext)]
 #[proc::unstable(feature = "env-commands")]
+#[proc::context(GenericContext)]
 pub unsafe fn get_audio_video_enable(
     callback: retro_environment_t,
 ) -> Result<AudioVideoEnable, EnvironmentCallError> {
@@ -1262,8 +1262,8 @@ pub unsafe fn get_audio_video_enable(
 }
 
 /// Returns a MIDI interface that can be used for raw data I/O.
-#[proc::context(GenericContext)]
 #[proc::unstable(feature = "env-commands")]
+#[proc::context(GenericContext)]
 pub fn get_midi_interface(
     callback: retro_environment_t,
 ) -> Result<retro_midi_interface, EnvironmentCallError> {
@@ -1272,8 +1272,8 @@ pub fn get_midi_interface(
 }
 
 /// Boolean value that indicates whether or not the frontend is in fastforwarding mode.
-#[proc::context(GenericContext)]
 #[proc::unstable(feature = "env-commands")]
+#[proc::context(GenericContext)]
 pub unsafe fn get_fastforwarding(
     callback: retro_environment_t,
 ) -> Result<bool, EnvironmentCallError> {
@@ -1286,8 +1286,8 @@ pub unsafe fn get_fastforwarding(
 ///
 /// The core can use the returned value to set an ideal
 /// refresh rate/framerate.
-#[proc::context(GenericContext)]
 #[proc::unstable(feature = "env-commands")]
+#[proc::context(GenericContext)]
 pub unsafe fn get_target_refresh_rate(
     callback: retro_environment_t,
 ) -> Result<f32, EnvironmentCallError> {
@@ -1303,8 +1303,8 @@ pub unsafe fn get_target_refresh_rate(
 /// If it returns true, you can pass [`RETRO_DEVICE_ID_JOYPAD_MASK`] as `id`
 /// to [`retro_input_state_t`] (make sure `device` is set to [`RETRO_DEVICE_JOYPAD`]).
 /// It will return a bitmask of all the digital buttons.
-#[proc::context(GenericContext)]
 #[proc::unstable(feature = "env-commands")]
+#[proc::context(GenericContext)]
 pub unsafe fn get_input_bitmasks(
     callback: retro_environment_t,
 ) -> Result<(), EnvironmentCallError> {
@@ -2286,8 +2286,8 @@ pub unsafe fn set_variable(
 
 /// Allows an implementation to get details on the actual rate
 /// the frontend is attempting to call [`Core::on_run`].
-#[proc::context(GenericContext)]
 #[proc::unstable(feature = "env-commands")]
+#[proc::context(GenericContext)]
 pub unsafe fn get_throttle_state(
     callback: retro_environment_t,
 ) -> Result<retro_throttle_state, EnvironmentCallError> {
@@ -2297,8 +2297,8 @@ pub unsafe fn get_throttle_state(
 
 /// Tells the core about the context the frontend is asking for savestate.
 //  See [`retro_savestate_context`]
-#[proc::context(GenericContext)]
 #[proc::unstable(feature = "env-commands")]
+#[proc::context(GenericContext)]
 pub unsafe fn get_savestate_context(
     callback: retro_environment_t,
 ) -> Result<retro_savestate_context, EnvironmentCallError> {
