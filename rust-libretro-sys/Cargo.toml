@@ -16,7 +16,7 @@ vulkan = ["dep:ash"]
 
 [dependencies]
 ash = { version = "0.37.2", optional = true }
-gisst-rust-libretro-sys-proc = { path = "rust-libretro-sys-proc", version = "0.4.0"}
+gisst-rust-libretro-sys-proc = { path = "./rust-libretro-sys-proc", version = "0.4.0"}
 
 [build-dependencies]
 bindgen = "0.73.2"
