@@ -429,7 +429,7 @@ dependencies = [
 
 [[package]]
 name = "gisst-rust-libretro"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "anyhow",
  "bincode",
@@ -457,7 +457,7 @@ dependencies = [
 
 [[package]]
 name = "gisst-rust-libretro-example-core"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "gisst-rust-libretro",
  "libc",
@@ -466,7 +466,7 @@ dependencies = [
 
 [[package]]
 name = "gisst-rust-libretro-proc"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "gisst-rust-libretro-sys",
  "proc-macro2",
@@ -476,16 +476,17 @@ dependencies = [
 
 [[package]]
 name = "gisst-rust-libretro-sys"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "ash",
  "bindgen",
  "gisst-rust-libretro-sys-proc",
+ "syn 3.0.9",
 ]
 
 [[package]]
 name = "gisst-rust-libretro-sys-proc"
-version = "0.4.0"
+version = "0.4.1"
 dependencies = [
  "proc-macro2",
  "quote",

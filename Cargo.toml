@@ -12,7 +12,7 @@ default-members = [
 ]
 
 [workspace.package]
-version = "0.4.0"
+version = "0.4.2"
 edition = "2024"
 repository = "https://github.com/joeosborn/rust-libretro/"
 
@@ -33,4 +33,4 @@ rpath = false
 [workspace.dependencies]
 proc-macro2 = "1.0.107"
 quote = "1.0.47"
-syn = { version="3.0.9", features = [ "extra-traits", "full", "parsing" ] }
+syn = { version="3.0", features = [ "extra-traits", "full", "parsing" ] }

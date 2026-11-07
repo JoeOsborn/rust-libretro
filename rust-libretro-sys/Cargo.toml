@@ -20,3 +20,4 @@ gisst-rust-libretro-sys-proc = { path = "./rust-libretro-sys-proc", version = "0
 
 [build-dependencies]
 bindgen = "0.73.2"
+syn.workspace = true
